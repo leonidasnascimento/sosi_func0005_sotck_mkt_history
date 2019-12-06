@@ -8,16 +8,15 @@ import threading
 import time
 import array
 
+from .model.stock import Stock
+from .model.history import History
+from .crawler import Crawler
 from typing import List
 from dateutil.relativedelta import relativedelta
 from configuration_manager.reader import reader
-from model.stock import Stock
-from model.history import History
-from crawler.crawler import Crawler
 
 SETTINGS_FILE_PATH = pathlib.Path(
     __file__).parent.parent.__str__() + "//local.settings.json"
-
 
 def main(func: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
@@ -38,8 +37,7 @@ def main(func: func.TimerRequest) -> None:
         date_parse_pattern: str = "%d/%m/%Y"
         
         # Crawling
-        logging.info(
-            "Getting stock market history list. It may take a while...")
+        logging.info("Getting stock market history list. It may take a while...")
 
         if(defined_start_date != "" and defined_end_date != ""):
             logging.info("From {} to {}".format(defined_start_date, defined_end_date))
@@ -66,7 +64,10 @@ def main(func: func.TimerRequest) -> None:
             stock_hist: Stock = crawler_obj.get_history(code['stock'])
             
             if stock_hist:
-                #DO SOMETHING HERE
+                json_obj = json.dumps(stock_hist.__dict__)
+
+                threading.Thread(target=invoke_url, args=(post_service_url, json_obj)).start()
+                logging.info("'{}' sent for data base persistence...".format(stock_hist.code))                
                 pass
             pass
 
@@ -77,4 +78,13 @@ def main(func: func.TimerRequest) -> None:
         error_log = '{} -> {}'
         logging.exception(error_log.format(utc_timestamp, str(ex)))
         pass
+    pass
+
+def invoke_url(url, json):
+    headers = {
+        'content-type': "application/json",
+        'cache-control': "no-cache"
+    }
+
+    requests.request("POST", url, data=json, headers=headers)
     pass
