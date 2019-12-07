@@ -3,8 +3,7 @@ import requests
 import locale
 
 from datetime import datetime
-from .model.history import History
-from .model.stock import Stock 
+from .model.stock_history import (Stock, History) 
 from bs4 import (BeautifulSoup, Tag)
 from typing import List
 
@@ -21,9 +20,6 @@ class Crawler:
 
     def get_history(self, _stock_code: str) -> Stock:
         self.target_url = self.target_url.format(_stock_code, self.start_timestamp, self.end_timestamp)
-
-        # REMOVE THIS
-        self.target_url = "https://br.financas.yahoo.com/quote/mglu3.SA/history?period1=1415239200&period2=1573009200&interval=1d&filter=history&frequency=1d"
 
         full_date_parse_str: str = "%d/%m/%Y %H:%M:%S"
         short_date_parse_str: str = "%d/%m/%Y"
@@ -68,12 +64,12 @@ class Crawler:
             if not price_col:
                 continue
 
-            openning: float = float(price_col[1].text.replace(',', '.').replace('-', ''))
-            close: float = float(price_col[4].text.replace(',', '.').replace('-', ''))
-            adjusted_close: float = float(price_col[5].text.replace(',', '.').replace('-', ''))
-            high: float = float(price_col[2].text.replace(',', '.').replace('-', ''))
-            low: float = float(price_col[3].text.replace(',', '.').replace('-', ''))
-            volume: float = float(price_col[6].text.replace('.', '').replace('-', ''))
+            openning: float = self.parse_str_to_float(price_col[1].text)
+            close: float = self.parse_str_to_float(price_col[4].text)
+            adjusted_close: float = self.parse_str_to_float(price_col[5].text)
+            high: float = self.parse_str_to_float(price_col[2].text)
+            low: float = self.parse_str_to_float(price_col[3].text)
+            volume: float = int(self.parse_str_to_float(price_col[6].text))
 
             locale.setlocale(locale.LC_ALL, "pt_BR")
             date: str = datetime.strptime(price_col[0].text, "%d de %b de %Y").strftime(short_date_parse_str)
@@ -84,4 +80,19 @@ class Crawler:
         
         print(stock_obj.__dict__)
         return stock_obj
+
+    def parse_str_to_float(self, str_value: str) -> float:
+        if not str_value:
+            return 0.00
+        
+        if str_value.find('-') > -1:
+            str_value = str_value.replace('-', '')
+
+        if str_value.find(',') > -1:
+            str_value = str_value.replace(',', '.')
+        
+        if str_value == "":
+            return 0.00
+
+        return float(str_value)
     pass

@@ -8,8 +8,7 @@ import threading
 import time
 import array
 
-from .model.stock import Stock
-from .model.history import History
+from .model.stock_history import (Stock, History)
 from .crawler import Crawler
 from typing import List
 from dateutil.relativedelta import relativedelta
@@ -64,7 +63,7 @@ def main(func: func.TimerRequest) -> None:
             stock_hist: Stock = crawler_obj.get_history(code['stock'])
             
             if stock_hist:
-                json_obj = json.dumps(stock_hist.__dict__)
+                json_obj = json.dumps(stock_hist.__dict__, default=lambda o: o.__dict__)
 
                 threading.Thread(target=invoke_url, args=(post_service_url, json_obj)).start()
                 logging.info("'{}' sent for data base persistence...".format(stock_hist.code))                
