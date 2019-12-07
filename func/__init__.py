@@ -47,11 +47,11 @@ def main(func: func.TimerRequest) -> None:
             formatted_start_date = int(time.mktime(start_date_aux.timetuple()))
             formatted_end_date = int(time.mktime(end_date_aux.timetuple()))
         else:
-            logging.warning("'start_date' and 'end_date' are required. Using default date for period: Yersterday")
+            logging.warning("'start_date' and 'end_date' are required. Using default date for period: Last week")
 
-            yesterday_aux: datetime.date = datetime.date.today() - relativedelta(days=1)
-            formatted_start_date = int(time.mktime(yesterday_aux.timetuple()))
-            formatted_end_date = int(time.mktime(yesterday_aux.timetuple()))
+            last_week_aux: datetime.date = datetime.date.today() - relativedelta(days=7)
+            formatted_start_date = int(time.mktime(last_week_aux.timetuple()))
+            formatted_end_date = int(time.mktime(datetime.date.today().timetuple()))
             pass
 
         # Getting stock code list
