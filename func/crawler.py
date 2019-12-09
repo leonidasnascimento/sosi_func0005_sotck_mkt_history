@@ -9,17 +9,18 @@ from typing import List
 
 class Crawler:
     target_url: str
+    unformatted_target_url: str
     start_timestamp: int
     end_timestamp: int
     
     def __init__(self, _target_url: str, _start_timestamp: int, _end_timestamp: int):
-        self.target_url = _target_url
+        self.unformatted_target_url = _target_url
         self.start_timestamp = _start_timestamp
         self.end_timestamp = _end_timestamp
         pass
 
     def get_history(self, _stock_code: str) -> Stock:
-        self.target_url = self.target_url.format(_stock_code, self.start_timestamp, self.end_timestamp)
+        self.target_url = self.unformatted_target_url.format(_stock_code, self.start_timestamp, self.end_timestamp)
 
         full_date_parse_str: str = "%d/%m/%Y %H:%M:%S"
         short_date_parse_str: str = "%d/%m/%Y"
@@ -64,12 +65,12 @@ class Crawler:
             if not price_col:
                 continue
 
-            openning: float = self.parse_str_to_float(price_col[1].text)
-            close: float = self.parse_str_to_float(price_col[4].text)
-            adjusted_close: float = self.parse_str_to_float(price_col[5].text)
-            high: float = self.parse_str_to_float(price_col[2].text)
-            low: float = self.parse_str_to_float(price_col[3].text)
-            volume: float = int(self.parse_str_to_float(price_col[6].text))
+            openning: float = float(self.format_str_number(price_col[1].text))
+            close: float = float(self.format_str_number(price_col[4].text))
+            adjusted_close: float = float(self.format_str_number(price_col[5].text))
+            high: float = float(self.format_str_number(price_col[2].text))
+            low: float = float(self.format_str_number(price_col[3].text))
+            volume: float = float(self.format_str_number(price_col[6].text))
 
             locale.setlocale(locale.LC_ALL, "pt_BR")
             date: str = datetime.strptime(price_col[0].text, "%d de %b de %Y").strftime(short_date_parse_str)
@@ -81,18 +82,24 @@ class Crawler:
         print(stock_obj.__dict__)
         return stock_obj
 
-    def parse_str_to_float(self, str_value: str) -> float:
-        if not str_value:
-            return 0.00
+    def format_str_number(self, str_value: str) -> str:
+        if str_value is None:
+            return ""
         
-        if str_value.find('-') > -1:
+        locale.setlocale(locale.LC_ALL, "pt_BR")
+        loc_decimal_point: str = locale.localeconv()['decimal_point']
+
+        if str_value.find('-') > -1: 
             str_value = str_value.replace('-', '')
-
-        if str_value.find(',') > -1:
-            str_value = str_value.replace(',', '.')
         
-        if str_value == "":
-            return 0.00
+        if str_value.find('.') > -1:
+            str_value = str_value.replace('.', '')
 
-        return float(str_value)
+        if str_value.find(loc_decimal_point) > -1:
+            str_value = str_value.replace(loc_decimal_point, '.')
+
+        if str_value == "":
+            return "0"
+
+        return str_value
     pass

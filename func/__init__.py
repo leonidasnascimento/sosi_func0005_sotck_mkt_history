@@ -63,10 +63,13 @@ def main(func: func.TimerRequest) -> None:
             stock_hist: Stock = crawler_obj.get_history(code['stock'])
             
             if stock_hist:
+                if not stock_hist.history:
+                    stock_hist.history = []    
+
                 json_obj = json.dumps(stock_hist.__dict__, default=lambda o: o.__dict__)
 
                 threading.Thread(target=invoke_url, args=(post_service_url, json_obj)).start()
-                logging.info("'{}' sent for data base persistence...".format(stock_hist.code))                
+                logging.info("'{}' sent for data base persistence...".format(code['stock']))                
                 pass
             pass
 
