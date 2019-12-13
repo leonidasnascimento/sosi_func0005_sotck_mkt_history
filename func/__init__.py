@@ -35,8 +35,6 @@ def main(func: func.TimerRequest) -> None:
         date_parse_pattern: str = "%d/%m/%Y"
         
         # Crawling
-        logging.info("Getting stock market history list. It may take a while...")
-
         start_date: datetime.date = datetime.date.today() - relativedelta(days=int(days_to_look_back))
         formatted_start_date = int(time.mktime(start_date.timetuple()))
         formatted_end_date = int(time.mktime(datetime.date.today().timetuple()))
@@ -49,9 +47,11 @@ def main(func: func.TimerRequest) -> None:
         thread_lst: List[threading.Thread] = []
         
         for code in stk_codes:
+            logging.info(code['stock'])
+            
             t_aux: threading.Thread = threading.Thread(target=process_crawling, args=(code['stock'], target_url, post_service_url, formatted_start_date, formatted_end_date))            
             thread_lst.append(t_aux)
-            
+        
             t_aux.start()
             pass
             
@@ -72,7 +72,8 @@ def main(func: func.TimerRequest) -> None:
 def invoke_url(url, json):
     headers = {
         'content-type': "application/json",
-        'cache-control': "no-cache"
+        'cache-control': "no-cache",
+        'content-length': str(len(str(json).encode('utf-8')))
     }
 
     requests.request("POST", url, data=json, headers=headers)
@@ -88,8 +89,6 @@ def process_crawling(stock_code: str, target_url: str, post_service_url: str, fo
 
         json_obj = json.dumps(stock_hist.__dict__, default=lambda o: o.__dict__)
 
-        threading.Thread(target=invoke_url, args=(post_service_url, json_obj)).start()
-
-        logging.info("'{}' sent for data base persistence...".format(stock_code))                
+        threading.Thread(target=invoke_url, args=(post_service_url, json_obj)).start()                
         pass
     pass
