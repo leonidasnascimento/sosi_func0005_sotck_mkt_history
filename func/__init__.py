@@ -2,7 +2,7 @@ import datetime
 import logging
 import azure.functions as func
 import json
-import requests
+import urllib3
 import pathlib
 import threading
 import time
@@ -30,7 +30,7 @@ def main(func: func.TimerRequest) -> None:
         target_url: str = config_obj.get_value("target_url")
         stock_code_list_service_url: str = config_obj.get_value("stock_code_list_service_url")
         days_to_look_back: str = config_obj.get_value("days_to_look_back", "0")
-        response: requests.Response = None
+        response: urllib3.response = None
         stk_codes: array.array = {}
         date_parse_pattern: str = "%d/%m/%Y"
         
@@ -42,7 +42,7 @@ def main(func: func.TimerRequest) -> None:
         logging.info("From {} to {}".format(start_date.strftime(date_parse_pattern), datetime.date.today().strftime(date_parse_pattern)))
 
         # Getting stock code list
-        response = requests.request("GET", stock_code_list_service_url)
+        response = urllib3.request.RequestMethods().request("GET", stock_code_list_service_url)
         stk_codes = json.loads(response.text)
         thread_lst: List[threading.Thread] = []
         
@@ -76,7 +76,7 @@ def invoke_url(url, json):
         'content-length': str(len(str(json).encode('utf-8')))
     }
 
-    requests.request("POST", url, data=json, headers=headers)
+    urllib3.request.RequestMethods().request("POST", url, data=json, headers=headers)
     pass
 
 def process_crawling(stock_code: str, target_url: str, post_service_url: str, formatted_start_date: int, formatted_end_date: int):
