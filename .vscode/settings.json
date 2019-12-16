@@ -5,5 +5,5 @@
     "azureFunctions.projectLanguage": "Python",
     "azureFunctions.projectRuntime": "~2",
     "debug.internalConsoleOptions": "neverOpen",
-    "python.pythonPath": "c:\\git\\sosi_func0005_sotck_mkt_history\\.venv\\Scripts\\python.exe"
+    "python.pythonPath": "C:\\Users\\leonidas.nascimento\\AppData\\Local\\Continuum\\anaconda3\\python.exe"
 }
