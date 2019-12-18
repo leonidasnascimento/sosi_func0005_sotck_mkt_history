@@ -2,11 +2,11 @@ import datetime
 import logging
 import azure.functions as func
 import json
-import requests
 import pathlib
 import threading
 import time
 import array
+import requests
 
 from .model.stock_history import (Stock, History)
 from .crawler import Crawler
