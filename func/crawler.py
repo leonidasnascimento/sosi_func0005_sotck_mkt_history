@@ -12,6 +12,7 @@ class Crawler:
     unformatted_target_url: str
     start_timestamp: int
     end_timestamp: int
+    default_locale: str = "pt_BR.UTF-8"
     
     def __init__(self, _target_url: str, _start_timestamp: int, _end_timestamp: int):
         self.unformatted_target_url = _target_url
@@ -72,7 +73,7 @@ class Crawler:
             low: float = float(self.format_str_number(price_col[3].text))
             volume: float = float(self.format_str_number(price_col[6].text))
 
-            locale.setlocale(locale.LC_ALL, "pt_BR")
+            locale.setlocale(locale.LC_ALL, self.default_locale)
             date: str = datetime.strptime(price_col[0].text, "%d de %b de %Y").strftime(short_date_parse_str)
 
             hist: History = History(date, openning, close, adjusted_close, high, low, volume)
@@ -86,7 +87,7 @@ class Crawler:
         if str_value is None:
             return ""
         
-        locale.setlocale(locale.LC_ALL, "pt_BR")
+        locale.setlocale(locale.LC_ALL, self.default_locale)
         loc_decimal_point: str = locale.localeconv()['decimal_point']
 
         if str_value.find('-') > -1: 
