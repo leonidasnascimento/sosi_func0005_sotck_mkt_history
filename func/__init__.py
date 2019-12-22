@@ -85,7 +85,8 @@ def process_crawling(stock_code: str, target_url: str, post_service_url: str, fo
 
     if stock_hist:
         if not stock_hist.history:
-            stock_hist.history = []    
+            stock_hist.history = []  
+            logging.error("{} - HISTORY EMPTY!".format(stock_code))  
 
         json_obj = json.dumps(stock_hist.__dict__, default=lambda o: o.__dict__)
 
