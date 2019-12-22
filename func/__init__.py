@@ -49,10 +49,12 @@ def main(func: func.TimerRequest) -> None:
         for code in stk_codes:
             logging.info(code['stock'])
             
-            t_aux: threading.Thread = threading.Thread(target=process_crawling, args=(code['stock'], target_url, post_service_url, formatted_start_date, formatted_end_date))            
-            thread_lst.append(t_aux)
+            process_crawling(code['stock'], target_url, post_service_url, formatted_start_date, formatted_end_date)
+
+            # t_aux: threading.Thread = threading.Thread(target=process_crawling, args=(code['stock'], target_url, post_service_url, formatted_start_date, formatted_end_date))            
+            # thread_lst.append(t_aux)
         
-            t_aux.start()
+            # t_aux.start()
             pass
             
         # Wait 'till all threads are done
@@ -80,16 +82,20 @@ def invoke_url(url, json):
     pass
 
 def process_crawling(stock_code: str, target_url: str, post_service_url: str, formatted_start_date: int, formatted_end_date: int):
-    crawler_obj: Crawler = Crawler(target_url, formatted_start_date, formatted_end_date)
-    stock_hist: Stock = crawler_obj.get_history(stock_code)
+    try:
+        crawler_obj: Crawler = Crawler(target_url, formatted_start_date, formatted_end_date)
+        stock_hist: Stock = crawler_obj.get_history(stock_code)
 
-    if stock_hist:
-        if not stock_hist.history:
-            stock_hist.history = []  
-            logging.error("{} - HISTORY EMPTY!".format(stock_code))  
+        if stock_hist:
+            if not stock_hist.history:
+                stock_hist.history = []  
+                logging.error("{} - HISTORY EMPTY!".format(stock_code))  
 
-        json_obj = json.dumps(stock_hist.__dict__, default=lambda o: o.__dict__)
+            json_obj = json.dumps(stock_hist.__dict__, default=lambda o: o.__dict__)
 
-        threading.Thread(target=invoke_url, args=(post_service_url, json_obj)).start()                
+            threading.Thread(target=invoke_url, args=(post_service_url, json_obj)).start()                
+            pass
+    except Exception as e:
+        logging.error(e)
         pass
     pass

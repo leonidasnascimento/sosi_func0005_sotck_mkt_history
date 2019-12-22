@@ -8,11 +8,16 @@ from bs4 import (BeautifulSoup, Tag)
 from typing import List
 
 class Crawler:
+    #Properties
     target_url: str
     unformatted_target_url: str
     start_timestamp: int
     end_timestamp: int
+    
+    # Constants
     default_locale: str = "pt_BR.UTF-8"
+    full_date_parse_str: str = "%d/%m/%Y %H:%M:%S"
+    short_date_parse_str: str = "%d/%m/%Y"
     
     def __init__(self, _target_url: str, _start_timestamp: int, _end_timestamp: int):
         self.unformatted_target_url = _target_url
@@ -23,12 +28,9 @@ class Crawler:
     def get_history(self, _stock_code: str) -> Stock:
         self.target_url = self.unformatted_target_url.format(_stock_code, self.start_timestamp, self.end_timestamp)
 
-        full_date_parse_str: str = "%d/%m/%Y %H:%M:%S"
-        short_date_parse_str: str = "%d/%m/%Y"
-
-        proc_date_time: str = datetime.now().strftime(full_date_parse_str)
-        start_date_aux: str = datetime.fromtimestamp(self.start_timestamp).strftime(short_date_parse_str)
-        end_date_aux: str = datetime.fromtimestamp(self.end_timestamp).strftime(short_date_parse_str)
+        proc_date_time: str = datetime.now().strftime(self.full_date_parse_str)
+        start_date_aux: str = datetime.fromtimestamp(self.start_timestamp).strftime(self.short_date_parse_str)
+        end_date_aux: str = datetime.fromtimestamp(self.end_timestamp).strftime(self.short_date_parse_str)
         stock_obj: Stock = Stock(_stock_code, proc_date_time, start_date_aux, end_date_aux, [])
         
         headers = {
@@ -73,15 +75,60 @@ class Crawler:
             low: float = float(self.format_str_number(price_col[3].text))
             volume: float = float(self.format_str_number(price_col[6].text))
 
-            locale.setlocale(locale.LC_ALL, self.default_locale)
-            date: str = datetime.strptime(price_col[0].text, "%d de %b de %Y").strftime(short_date_parse_str)
-
+            # Right way of formatting date is right bellow. We decided to use a work around to speed thing up.
+            # locale.setlocale(locale.LC_ALL, self.default_locale)
+            # datetime.strptime(price_col[0].text, "%d de %b de %Y").strftime(slef.short_date_parse_str)
+            
+            # Date formating work around
+            date: str = self.format_brl_date_str(price_col[0].text)
+            
             hist: History = History(date, openning, close, adjusted_close, high, low, volume)
             stock_obj.history.append(hist)
             pass
         
         print(stock_obj.__dict__)
         return stock_obj
+
+    def format_brl_date_str(self, str_value: str) -> str:
+        if str_value is None:
+            return ""
+
+        if str_value == "":
+            return ""
+        
+        arr_date: list = str_value.split(" de ")
+        month_num: int = 0 
+
+        if len(arr_date) < 3:
+            return ""
+
+        if str(arr_date[1]).lower() == "jan":
+            month_num = 1
+        elif str(arr_date[1]).lower() == "fev":
+            month_num = 2
+        elif str(arr_date[1]).lower() == "mar":
+            month_num = 3
+        elif str(arr_date[1]).lower() == "abr":
+            month_num = 4
+        elif str(arr_date[1]).lower() == "mai":
+            month_num = 5
+        elif str(arr_date[1]).lower() == "jun":
+            month_num = 6
+        elif str(arr_date[1]).lower() == "jul":
+            month_num = 7
+        elif str(arr_date[1]).lower() == "ago":
+            month_num = 8
+        elif str(arr_date[1]).lower() == "set":
+            month_num = 9
+        elif str(arr_date[1]).lower() == "out":
+            month_num = 10
+        elif str(arr_date[1]).lower() == "nov":
+            month_num = 11
+        elif str(arr_date[1]).lower() == "dez":
+            month_num = 12
+
+        return_date = datetime(int(arr_date[2]), month_num, int(arr_date[0]))
+        return return_date.strftime(self.short_date_parse_str)
 
     def format_str_number(self, str_value: str) -> str:
         if str_value is None:
