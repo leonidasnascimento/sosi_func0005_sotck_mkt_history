@@ -134,8 +134,8 @@ class Crawler:
         if str_value is None:
             return ""
         
-        locale.setlocale(locale.LC_ALL, self.default_locale)
-        loc_decimal_point: str = locale.localeconv()['decimal_point']
+        # locale.setlocale(locale.LC_ALL, self.default_locale)
+        # loc_decimal_point: str = locale.localeconv()['decimal_point']
 
         if str_value.find('-') > -1: 
             str_value = str_value.replace('-', '')
@@ -143,8 +143,8 @@ class Crawler:
         if str_value.find('.') > -1:
             str_value = str_value.replace('.', '')
 
-        if str_value.find(loc_decimal_point) > -1:
-            str_value = str_value.replace(loc_decimal_point, '.')
+        if str_value.find(',') > -1:
+            str_value = str_value.replace(',', '.')
 
         if str_value == "":
             return "0"
