@@ -49,12 +49,12 @@ def main(func: func.TimerRequest) -> None:
         for code in stk_codes:
             logging.info(code['stock'])
             
-            process_crawling(code['stock'], target_url, post_service_url, formatted_start_date, formatted_end_date)
+            # process_crawling(code['stock'], target_url, post_service_url, formatted_start_date, formatted_end_date)
 
-            # t_aux: threading.Thread = threading.Thread(target=process_crawling, args=(code['stock'], target_url, post_service_url, formatted_start_date, formatted_end_date))            
-            # thread_lst.append(t_aux)
+            t_aux: threading.Thread = threading.Thread(target=process_crawling, args=(code['stock'], target_url, post_service_url, formatted_start_date, formatted_end_date))            
+            thread_lst.append(t_aux)
         
-            # t_aux.start()
+            t_aux.start()
             pass
             
         # Wait 'till all threads are done
